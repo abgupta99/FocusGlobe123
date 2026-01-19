@@ -110,6 +110,39 @@ function App() {
     }
   };
 
+  // Heartbeat: Update last_seen every 3 minutes while studying
+  useEffect(() => {
+    if (!isStudying) return;
+
+    const updateHeartbeat = async () => {
+      const sessionId = localStorage.getItem('focus_globe_session_id');
+      if (sessionId) {
+        try {
+          const { error } = await supabase
+            .from('active_sessions')
+            .update({ last_seen: new Date().toISOString() })
+            .eq('id', sessionId);
+
+          if (error) {
+            console.error('Error updating heartbeat:', error);
+          } else {
+            console.log('Heartbeat updated');
+          }
+        } catch (err) {
+          console.error('Unexpected error updating heartbeat:', err);
+        }
+      }
+    };
+
+    // Update immediately when starting
+    updateHeartbeat();
+
+    // Then update every 3 minutes (180000ms) - well within the 10-minute timeout
+    const heartbeatInterval = setInterval(updateHeartbeat, 180000);
+
+    return () => clearInterval(heartbeatInterval);
+  }, [isStudying]);
+
   // Cleanup on tab close
   useEffect(() => {
     const handleBeforeUnload = async () => {
