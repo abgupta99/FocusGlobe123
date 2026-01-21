@@ -6,6 +6,7 @@ import theme from './theme';
 import StudyGlobe from './components/StudyGlobe';
 import HUD from './components/HUD';
 import StartStudyingDialog from './components/StartStudyingDialog';
+import GlobalChat from './components/GlobalChat';
 import { supabase } from './supabaseClient';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
   const [userCount, setUserCount] = useState(0);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [userName, setUserName] = useState('');
 
   // Location fuzzing: ~50km is approximately 0.45 degrees
   const fuzzLocation = (lat, lng) => {
@@ -31,6 +33,7 @@ function App() {
 
   const handleDialogSubmit = async ({ name, subject, message }) => {
     setDialogOpen(false);
+    setUserName(name); // Store username for chat
 
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by your browser');
@@ -180,6 +183,7 @@ function App() {
           onClose={() => setDialogOpen(false)}
           onSubmit={handleDialogSubmit}
         />
+        <GlobalChat username={userName} isStudying={isStudying} />
       </div>
     </ThemeProvider>
   );
